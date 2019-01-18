@@ -30,8 +30,7 @@ RUN curl -sS https://getcomposer.org/installer | php \
     && composer self-update
 
 # Copy package manager setting
-COPY composer.json composer.lock package.json package-lock.json ./
-
+COPY composer.json composer.lock ./
 
 # Create user
 RUN useradd --user-group --create-home --shell /bin/false app
