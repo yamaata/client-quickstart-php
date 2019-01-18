@@ -80,6 +80,10 @@ div#controls {
       border: 1px solid #686865;
     }
 
+      div#controls div#call-controls button#button-accept {
+        display: none;
+      }
+
       div#controls div#call-controls button#button-hangup {
         display: none;
       }

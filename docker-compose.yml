@@ -1,0 +1,11 @@
+version: '3'
+services:
+  web:
+    build: .
+    container_name: 'client-quickstart-php'
+    ports:
+     - '1080:8000'
+    volumes:
+     - ./:/var/www/html
+     - /var/www/html/vendor
+     - /var/www/html/node_modules

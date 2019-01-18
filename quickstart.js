@@ -6,9 +6,28 @@
       console.log('Token: ' + data.token);
 
       // Setup Twilio.Device
-      Twilio.Device.setup(data.token);
+      Twilio.Device.setup(data.token, { debug: true });
 
       Twilio.Device.ready(function (device) {
+        const availableDevices = [];
+        device.audio.availableOutputDevices.forEach(function(device, id, idx) {
+          if(navigator.userAgent.indexOf('Mac') !== -1) {
+            // for Mac
+            if (device.label.includes('Built-in') || device.label.includes('Sennheiser')) {
+              availableDevices.push(device);
+            }
+          } else {
+            // for Windows
+            if (id.includes('default') || id.includes('communications')) {
+              availableDevices.push(device);
+            }
+          }
+        });
+
+        log('Output device: ' + availableDevices.map(device => device.label));
+        device.audio.speakerDevices.set(availableDevices[1].deviceId);
+        device.audio.ringtoneDevices.set(availableDevices.map(device => device.deviceId));
+
         log('Twilio.Device Ready!');
         document.getElementById('call-controls').style.display = 'block';
       });
@@ -19,7 +38,7 @@
 
       Twilio.Device.connect(function (conn) {
         log('Successfully established call!');
-        document.getElementById('button-call').style.display = 'none';
+        document.getElementById('button-accept').style.display = 'none';
         document.getElementById('button-hangup').style.display = 'inline';
       });
 
@@ -27,6 +46,12 @@
         log('Call ended.');
         document.getElementById('button-call').style.display = 'inline';
         document.getElementById('button-hangup').style.display = 'none';
+      });
+
+      Twilio.Device.cancel(function (conn) {
+        log('Call canceled!');
+        document.getElementById('button-accept').style.display = 'none';
+        document.getElementById('button-call').style.display = 'inline';
       });
 
       Twilio.Device.incoming(function (conn) {
@@ -38,7 +63,8 @@
           log('It\'s your nemesis. Rejected call.');
         } else {
           // accept the incoming connection and start two-way audio
-          conn.accept();
+          document.getElementById('button-call').style.display = 'none';
+          document.getElementById('button-accept').style.display = 'inline';
         }
       });
 
@@ -57,6 +83,12 @@
 
     console.log('Calling ' + params.To + '...');
     Twilio.Device.connect(params);
+  };
+
+  // Bind button to accept call
+  document.getElementById('button-accept').onclick = function () {
+    // accept call
+    Twilio.Device.activeConnection().accept();
   };
 
   // Bind button to hangup call
